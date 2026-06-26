@@ -58,6 +58,7 @@ Edit `.env`:
 | `SSH_DEPLOY_APP_PATH` | Directory on the VPS where the app lives |
 | `IMAGE_NAME` | Docker image name (default: `scrumpoker`) |
 | `IMAGE_TAG` | Docker image tag (default: `latest`) |
+| `APP_PORT` | Host port the app is exposed on (default: `3001`) |
 
 ### Deploy
 
@@ -73,4 +74,4 @@ The script will:
 4. Start the container with `docker compose up -d`
 5. Prune old images on the VPS
 
-The app will be available on port `3001` of your VPS by default. Change the host port mapping in `docker-compose.yml` if needed.
+The app will be available at `http://<VPS>:$APP_PORT` (default `3001`). Override the port by setting `APP_PORT` in `.env`.
