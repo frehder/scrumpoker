@@ -1,0 +1,13 @@
+.git
+.next
+node_modules
+.env
+.env.local
+.env*.local
+.env.example
+npm-debug.log*
+pnpm-debug.log*
+package-lock.json
+README.md
+*.md
+deploy.sh

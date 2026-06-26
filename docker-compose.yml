@@ -1,0 +1,9 @@
+services:
+  scrumpoker:
+    image: ${IMAGE_NAME:-scrumpoker}:${IMAGE_TAG:-latest}
+    container_name: scrumpoker
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production

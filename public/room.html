@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scrum Poker – Room</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body class="room-page">
+    <!-- Name modal -->
+    <div id="name-modal" class="modal-overlay">
+      <div class="modal-card">
+        <h2>Join Room</h2>
+        <p>Enter your name to join the poker session.</p>
+        <form id="name-form">
+          <input
+            id="name-input"
+            type="text"
+            placeholder="Your name"
+            maxlength="32"
+            autocomplete="off"
+            required
+          />
+          <label class="spectator-label">
+            <input id="spectator-input" type="checkbox" />
+            Join as spectator
+          </label>
+          <button type="submit" class="btn btn-primary">Join</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Main UI -->
+    <div id="app" class="hidden">
+      <header class="room-header">
+        <h1>Scrum Poker</h1>
+        <div class="room-id">
+          Room: <span id="room-id-display"></span>
+          <button id="copy-btn" class="btn btn-ghost" title="Copy invite link">📋 Copy link</button>
+        </div>
+      </header>
+
+      <main class="room-main">
+        <!-- Vote cards -->
+        <section class="vote-section">
+          <h2>Your vote</h2>
+          <div id="card-deck" class="card-deck"></div>
+        </section>
+
+        <!-- Controls -->
+        <section class="controls">
+          <button id="show-btn" class="btn btn-primary">Show Votes</button>
+          <button id="reset-btn" class="btn btn-secondary">Reset</button>
+        </section>
+
+        <!-- Players -->
+        <section class="players-section">
+          <h2>Players</h2>
+          <ul id="player-list" class="player-list"></ul>
+          <div id="vote-average" class="vote-average hidden"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
