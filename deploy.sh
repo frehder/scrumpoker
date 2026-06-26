@@ -15,6 +15,7 @@ SSH_DEPLOY_PORT="${SSH_DEPLOY_PORT:-22}"
 SSH_DEPLOY_APP_PATH="${SSH_DEPLOY_APP_PATH:-/opt/docker/scrumpoker}"
 IMAGE_NAME="${IMAGE_NAME:-scrumpoker}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
+APP_PORT="${APP_PORT:-3001}"
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 info()  { echo "[deploy] $*"; }
@@ -27,24 +28,23 @@ SSH_OPTS=(-p "$SSH_DEPLOY_PORT")
 SSH_TARGET="${SSH_DEPLOY_USER}@${SSH_DEPLOY_HOST}"
 
 # ── 1. Build image locally ────────────────────────────────────────────────────
-info "Building ${IMAGE_NAME}:${IMAGE_TAG} ..."
-docker build -t "${IMAGE_NAME}:${IMAGE_TAG}" .
+info "Building ${IMAGE_NAME}:${IMAGE_TAG} for linux/amd64 ..."
+docker build --platform linux/amd64 -t "${IMAGE_NAME}:${IMAGE_TAG}" .
 
 # ── 2. Copy docker-compose.yml to VPS ────────────────────────────────────────
 info "Copying docker-compose.yml to VPS ..."
 ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "mkdir -p '${SSH_DEPLOY_APP_PATH}'"
-scp -P "$SSH_DEPLOY_PORT" docker-compose.yml \
-  "${SSH_TARGET}:${SSH_DEPLOY_APP_PATH}/docker-compose.yml"
+scp -P "$SSH_DEPLOY_PORT" docker-compose.yml "${SSH_TARGET}:${SSH_DEPLOY_APP_PATH}/docker-compose.yml"
 
 # ── 3. Stream image → VPS and start ──────────────────────────────────────────
 info "Transferring image to VPS and starting container ..."
 docker save "${IMAGE_NAME}:${IMAGE_TAG}" | gzip | \
   ssh -p "$SSH_DEPLOY_PORT" "${SSH_DEPLOY_USER}@${SSH_DEPLOY_HOST}" \
     "docker load && cd '${SSH_DEPLOY_APP_PATH}' && \
-     IMAGE_NAME='${IMAGE_NAME}' IMAGE_TAG='${IMAGE_TAG}' docker compose up -d"
+     IMAGE_NAME='${IMAGE_NAME}' IMAGE_TAG='${IMAGE_TAG}' APP_PORT='${APP_PORT}' docker compose up -d"
 
 # ── 4. Prune old images on VPS ────────────────────────────────────────────────
 info "Pruning old images on VPS ..."
 ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "docker image prune -f"
 
-info "Done! App is running at http://${SSH_DEPLOY_HOST}:3001"
+info "Done! App is running at http://${SSH_DEPLOY_HOST}:${APP_PORT}"
