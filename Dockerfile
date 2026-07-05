@@ -12,8 +12,9 @@ FROM node:24-alpine AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 
-# Non-root user for security
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Non-root user with fixed UID/GID so host bind-mount permissions can match
+RUN addgroup -S -g 1001 appgroup && adduser -S -u 1001 -G appgroup appuser
+RUN mkdir -p /app/data && chown -R appuser:appgroup /app
 USER appuser
 
 COPY --from=deps --chown=appuser:appgroup /app/node_modules ./node_modules

@@ -32,6 +32,50 @@ pnpm dev       # starts server with --watch on port 3000
 
 Open `http://localhost:3000`, click **Create a Room** and share the URL with teammates.
 
+## Server-side usage stats
+
+The server tracks aggregate usage stats directly:
+
+- Landing page views (`/`)
+- Room page views (`/room/:id`)
+- Rooms created (`/create`)
+- Room joins (Socket.IO `join-room`)
+- Votes submitted, reveals, and resets
+
+Stats are persisted to `data/stats.json`.
+
+### Enable protected stats endpoint
+
+Set `STATS_TOKEN` in `.env`:
+
+```bash
+STATS_TOKEN=your-long-random-token
+```
+
+Then query:
+
+```bash
+curl -H "x-stats-token: your-long-random-token" http://localhost:3000/admin/stats
+```
+
+Alternative (query param):
+
+```bash
+curl "http://localhost:3000/admin/stats?token=your-long-random-token"
+```
+
+If `STATS_TOKEN` is not set, `/admin/stats` returns `404`.
+
+### Admin dashboard
+
+Open `/admin` in your browser. Enter the token to see:
+
+- **Live**: active rooms and WebSocket connections
+- **All-time totals**: a card per metric
+- **Daily usage**: full table, newest day first (today is highlighted)
+
+The token can be bookmarked in the URL (`/admin?token=…`) for quick access.
+
 ## Deployment
 
 The app ships as a Docker image built locally and streamed directly to your VPS — no container registry needed.
@@ -59,6 +103,9 @@ Edit `.env`:
 | `IMAGE_NAME` | Docker image name (default: `scrumpoker`) |
 | `IMAGE_TAG` | Docker image tag (default: `latest`) |
 | `APP_PORT` | Host port the app is exposed on (default: `3001`) |
+| `APP_NAME` | App name used in host volume path (default: `scrumpoker`) |
+| `VOLUME_BASE_PATH` | Host base path for volumes (default: `/opt/docker/volumes`) |
+| `STATS_TOKEN` | Protects `/admin/stats` (recommended) |
 
 ### Deploy
 
@@ -69,9 +116,18 @@ Edit `.env`:
 The script will:
 
 1. Build the Docker image locally
-2. Copy `docker-compose.yml` to the VPS
-3. Stream the image via `docker save | gzip | ssh … docker load`
-4. Start the container with `docker compose up -d`
-5. Prune old images on the VPS
+2. Copy `docker-compose.yml` and a generated `.env` to the VPS
+3. Fix bind-mount ownership via a temporary Alpine container
+4. Stream the image via `docker save | gzip | ssh … docker load`
+5. Start (or recreate) the container with `docker compose up -d`
+6. Prune old images on the VPS
 
 The app will be available at `http://<VPS>:$APP_PORT` (default `3001`). Override the port by setting `APP_PORT` in `.env`.
+
+Usage stats persistence is backed by a bind mount at `$VOLUME_BASE_PATH/$APP_NAME` on the host (default: `/opt/docker/volumes/scrumpoker`), mounted to `/app/data` in the container.
+
+### Reset stats
+
+```bash
+ssh user@your-vps 'rm /opt/docker/volumes/scrumpoker/stats.json && docker restart scrumpoker'
+```

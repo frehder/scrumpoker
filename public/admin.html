@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scrum Poker — Stats</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #f8fafc;
+        color: #1e293b;
+        min-height: 100vh;
+        padding: 2rem 1.5rem;
+      }
+
+      header {
+        display: flex;
+        align-items: baseline;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      h1 { font-size: 1.4rem; color: #0f172a; }
+      h1 a { color: inherit; text-decoration: none; }
+      h1 a:hover { text-decoration: underline; }
+
+      h2 {
+        font-size: .7rem;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        margin-bottom: .75rem;
+      }
+
+      /* ── Token form ─────────────────────────────────────────────────── */
+      #token-form {
+        display: flex;
+        gap: .5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+      }
+
+      #token-input {
+        flex: 1;
+        max-width: 340px;
+        padding: .45rem .75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: .375rem;
+        background: #fff;
+        color: #1e293b;
+        font-size: .875rem;
+        outline: none;
+      }
+      #token-input:focus { border-color: #6366f1; }
+
+      .btn {
+        padding: .45rem 1rem;
+        border: none;
+        border-radius: .375rem;
+        font-size: .875rem;
+        cursor: pointer;
+      }
+      .btn-primary { background: #6366f1; color: #fff; }
+      .btn-primary:hover { background: #4f46e5; }
+      .btn-ghost { background: #fff; color: #64748b; border: 1px solid #cbd5e1; }
+      .btn-ghost:hover { background: #f1f5f9; }
+
+      /* ── Error / status ─────────────────────────────────────────────── */
+      #error { color: #dc2626; font-size: .875rem; margin-bottom: 1rem; min-height: 1.2em; }
+
+      /* ── Stats sections ─────────────────────────────────────────────── */
+      #stats { display: none; }
+
+      .section { margin-bottom: 2.5rem; }
+
+      /* ── Cards ──────────────────────────────────────────────────────── */
+      .cards { display: flex; flex-wrap: wrap; gap: .75rem; }
+
+      .card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: .5rem;
+        padding: .875rem 1.25rem;
+        min-width: 130px;
+      }
+
+      .card-label { font-size: .7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .06em; }
+      .card-value { font-size: 1.75rem; font-weight: 700; color: #0f172a; margin-top: .2rem; }
+      .card-value.live { color: #059669; }
+
+      /* ── Daily table ────────────────────────────────────────────────── */
+      .table-wrap { overflow-x: auto; border-radius: .5rem; border: 1px solid #e2e8f0; }
+
+      table { width: 100%; border-collapse: collapse; font-size: .825rem; white-space: nowrap; }
+
+      th, td {
+        padding: .5rem .875rem;
+        text-align: right;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      th {
+        background: #f8fafc;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: .7rem;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        position: sticky;
+        top: 0;
+      }
+      td:first-child, th:first-child { text-align: left; }
+      tr:last-child td { border-bottom: none; }
+      tr:hover td { background: #f8fafc; }
+
+      .today-row td { color: #4f46e5; font-weight: 600; }
+
+      #updated { font-size: .7rem; color: #94a3b8; margin-top: 2rem; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1><a href="/">Scrum Poker</a> — Stats</h1>
+    </header>
+
+    <form id="token-form">
+      <input id="token-input" type="password" placeholder="Stats token" autocomplete="off" />
+      <button type="submit" class="btn btn-primary">Load</button>
+      <button type="button" id="refresh-btn" class="btn btn-ghost" style="display:none">Refresh</button>
+    </form>
+    <div id="error"></div>
+
+    <div id="stats">
+      <div class="section">
+        <h2>Live</h2>
+        <div class="cards">
+          <div class="card">
+            <div class="card-label">Active rooms</div>
+            <div class="card-value live" id="active-rooms">—</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Connections</div>
+            <div class="card-value live" id="active-connections">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>All-time totals</h2>
+        <div class="cards" id="totals-cards"></div>
+      </div>
+
+      <div class="section">
+        <h2>Daily usage</h2>
+        <div class="table-wrap">
+          <table>
+            <thead id="daily-thead"></thead>
+            <tbody id="daily-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="updated"></div>
+
+    <script>
+      const METRICS = [
+        { key: "landingViews",   label: "Landing" },
+        { key: "roomViews",      label: "Rooms viewed" },
+        { key: "roomsCreated",   label: "Rooms created" },
+        { key: "roomJoins",      label: "Joins" },
+        { key: "votesSubmitted", label: "Votes" },
+        { key: "votesRevealed",  label: "Reveals" },
+        { key: "votesReset",     label: "Resets" },
+      ];
+
+      const tokenInput = document.getElementById("token-input");
+      const tokenForm  = document.getElementById("token-form");
+      const refreshBtn = document.getElementById("refresh-btn");
+      const errorEl    = document.getElementById("error");
+      const statsEl    = document.getElementById("stats");
+      const updatedEl  = document.getElementById("updated");
+
+      let currentToken = new URLSearchParams(location.search).get("token") || "";
+      if (currentToken) {
+        tokenInput.value = currentToken;
+        loadStats(currentToken);
+      }
+
+      tokenForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        currentToken = tokenInput.value.trim();
+        if (!currentToken) return;
+        const url = new URL(location.href);
+        url.searchParams.set("token", currentToken);
+        history.replaceState(null, "", url);
+        loadStats(currentToken);
+      });
+
+      refreshBtn.addEventListener("click", () => loadStats(currentToken));
+
+      async function loadStats(token) {
+        errorEl.textContent = "";
+        try {
+          const res = await fetch(`/admin/stats?token=${encodeURIComponent(token)}`);
+          if (res.status === 401) { errorEl.textContent = "Invalid token."; statsEl.style.display = "none"; return; }
+          if (res.status === 404) { errorEl.textContent = "Stats endpoint not configured on server (STATS_TOKEN not set)."; return; }
+          if (!res.ok) { errorEl.textContent = `Server error: ${res.status}`; return; }
+          render(await res.json());
+        } catch (err) {
+          errorEl.textContent = `Failed to load: ${err.message}`;
+        }
+      }
+
+      function render(data) {
+        statsEl.style.display = "block";
+        refreshBtn.style.display = "inline-block";
+
+        document.getElementById("active-rooms").textContent = data.activeRooms ?? "—";
+        document.getElementById("active-connections").textContent = data.activeConnections ?? "—";
+
+        // Totals cards
+        document.getElementById("totals-cards").innerHTML = METRICS.map((m) => `
+          <div class="card">
+            <div class="card-label">${m.label}</div>
+            <div class="card-value">${(data.totals?.[m.key] ?? 0).toLocaleString()}</div>
+          </div>`).join("");
+
+        // Daily table
+        const rows = data.byDay ?? [];
+        const today = new Date().toISOString().slice(0, 10);
+
+        document.getElementById("daily-thead").innerHTML = `<tr>
+          <th>Date</th>
+          ${METRICS.map((m) => `<th>${m.label}</th>`).join("")}
+        </tr>`;
+
+        document.getElementById("daily-tbody").innerHTML = rows.length === 0
+          ? `<tr><td colspan="${METRICS.length + 1}" style="text-align:center;color:#475569;padding:1.5rem">No data yet</td></tr>`
+          : rows.map((row) => `
+            <tr${row.date === today ? ' class="today-row"' : ""}>
+              <td>${row.date} <span style="color:#94a3b8;font-weight:400">${new Date(row.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short" })}</span>${row.date === today ? " ✦" : ""}</td>
+              ${METRICS.map((m) => `<td>${(row[m.key] ?? 0).toLocaleString()}</td>`).join("")}
+            </tr>`).join("");
+
+        updatedEl.textContent = data.updatedAt
+          ? `Last updated: ${new Date(data.updatedAt).toLocaleString()}`
+          : "";
+      }
+    </script>
+  </body>
+</html>
