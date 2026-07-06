@@ -44,37 +44,15 @@ The server tracks aggregate usage stats directly:
 
 Stats are persisted to `data/stats.json`.
 
-### Enable protected stats endpoint
-
-Set `STATS_TOKEN` in `.env`:
-
-```bash
-STATS_TOKEN=your-long-random-token
-```
-
-Then query:
-
-```bash
-curl -H "x-stats-token: your-long-random-token" http://localhost:3000/admin/stats
-```
-
-Alternative (query param):
-
-```bash
-curl "http://localhost:3000/admin/stats?token=your-long-random-token"
-```
-
-If `STATS_TOKEN` is not set, `/admin/stats` returns `404`.
-
 ### Admin dashboard
 
-Open `/admin` in your browser. Enter the token to see:
+Open `/admin` in your browser to see:
 
 - **Live**: active rooms and WebSocket connections
 - **All-time totals**: a card per metric
 - **Daily usage**: full table, newest day first (today is highlighted)
 
-The token can be bookmarked in the URL (`/admin?token=…`) for quick access.
+Stats are also available as JSON at `/admin/stats`.
 
 ## Deployment
 
@@ -105,7 +83,6 @@ Edit `.env`:
 | `APP_PORT` | Host port the app is exposed on (default: `3001`) |
 | `APP_NAME` | App name used in host volume path (default: `scrumpoker`) |
 | `VOLUME_BASE_PATH` | Host base path for volumes (default: `/opt/docker/volumes`) |
-| `STATS_TOKEN` | Protects `/admin/stats` (recommended) |
 
 ### Deploy
 
