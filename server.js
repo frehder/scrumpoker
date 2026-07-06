@@ -12,7 +12,6 @@ const httpServer = createServer(app);
 const io = new Server(httpServer);
 
 const PORT = process.env.PORT || 3000;
-const STATS_TOKEN = process.env.STATS_TOKEN || "";
 const STATS_DIR = join(__dirname, "data");
 const STATS_FILE = join(STATS_DIR, "stats.json");
 
@@ -140,14 +139,7 @@ app.get("/admin", (_req, res) => {
   res.sendFile(join(__dirname, "public", "admin.html"));
 });
 
-app.get("/admin/stats", (req, res) => {
-  if (!STATS_TOKEN) {
-    return res.status(404).json({ error: "Not found" });
-  }
-  const token = String(req.query.token || req.get("x-stats-token") || "");
-  if (token !== STATS_TOKEN) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
+app.get("/admin/stats", (_req, res) => {
   const byDay = Object.entries(stats.byDay)
     .sort(([a], [b]) => b.localeCompare(a))
     .map(([date, counts]) => ({ date, ...counts }));

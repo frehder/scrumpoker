@@ -35,27 +35,6 @@
         margin-bottom: .75rem;
       }
 
-      /* ── Token form ─────────────────────────────────────────────────── */
-      #token-form {
-        display: flex;
-        gap: .5rem;
-        flex-wrap: wrap;
-        margin-bottom: 1.5rem;
-      }
-
-      #token-input {
-        flex: 1;
-        max-width: 340px;
-        padding: .45rem .75rem;
-        border: 1px solid #cbd5e1;
-        border-radius: .375rem;
-        background: #fff;
-        color: #1e293b;
-        font-size: .875rem;
-        outline: none;
-      }
-      #token-input:focus { border-color: #6366f1; }
-
       .btn {
         padding: .45rem 1rem;
         border: none;
@@ -63,16 +42,11 @@
         font-size: .875rem;
         cursor: pointer;
       }
-      .btn-primary { background: #6366f1; color: #fff; }
-      .btn-primary:hover { background: #4f46e5; }
       .btn-ghost { background: #fff; color: #64748b; border: 1px solid #cbd5e1; }
       .btn-ghost:hover { background: #f1f5f9; }
 
       /* ── Error / status ─────────────────────────────────────────────── */
       #error { color: #dc2626; font-size: .875rem; margin-bottom: 1rem; min-height: 1.2em; }
-
-      /* ── Stats sections ─────────────────────────────────────────────── */
-      #stats { display: none; }
 
       .section { margin-bottom: 2.5rem; }
 
@@ -125,11 +99,7 @@
       <h1><a href="/">Scrum Poker</a> — Stats</h1>
     </header>
 
-    <form id="token-form">
-      <input id="token-input" type="password" placeholder="Stats token" autocomplete="off" />
-      <button type="submit" class="btn btn-primary">Load</button>
-      <button type="button" id="refresh-btn" class="btn btn-ghost" style="display:none">Refresh</button>
-    </form>
+    <button type="button" id="refresh-btn" class="btn btn-ghost" style="margin-bottom:1.5rem">Refresh</button>
     <div id="error"></div>
 
     <div id="stats">
@@ -176,37 +146,19 @@
         { key: "votesReset",     label: "Resets" },
       ];
 
-      const tokenInput = document.getElementById("token-input");
-      const tokenForm  = document.getElementById("token-form");
       const refreshBtn = document.getElementById("refresh-btn");
       const errorEl    = document.getElementById("error");
       const statsEl    = document.getElementById("stats");
       const updatedEl  = document.getElementById("updated");
 
-      let currentToken = new URLSearchParams(location.search).get("token") || "";
-      if (currentToken) {
-        tokenInput.value = currentToken;
-        loadStats(currentToken);
-      }
+      loadStats();
 
-      tokenForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        currentToken = tokenInput.value.trim();
-        if (!currentToken) return;
-        const url = new URL(location.href);
-        url.searchParams.set("token", currentToken);
-        history.replaceState(null, "", url);
-        loadStats(currentToken);
-      });
+      refreshBtn.addEventListener("click", () => loadStats());
 
-      refreshBtn.addEventListener("click", () => loadStats(currentToken));
-
-      async function loadStats(token) {
+      async function loadStats() {
         errorEl.textContent = "";
         try {
-          const res = await fetch(`/admin/stats?token=${encodeURIComponent(token)}`);
-          if (res.status === 401) { errorEl.textContent = "Invalid token."; statsEl.style.display = "none"; return; }
-          if (res.status === 404) { errorEl.textContent = "Stats endpoint not configured on server (STATS_TOKEN not set)."; return; }
+          const res = await fetch("/admin/stats");
           if (!res.ok) { errorEl.textContent = `Server error: ${res.status}`; return; }
           render(await res.json());
         } catch (err) {
@@ -216,7 +168,6 @@
 
       function render(data) {
         statsEl.style.display = "block";
-        refreshBtn.style.display = "inline-block";
 
         document.getElementById("active-rooms").textContent = data.activeRooms ?? "—";
         document.getElementById("active-connections").textContent = data.activeConnections ?? "—";
