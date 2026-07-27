@@ -152,6 +152,8 @@ function renderPlayers(users) {
         revealClass = " revealed-high";
       } else if (isNumericVote && hasSpread && numericVote === lowestVote) {
         revealClass = " revealed-low";
+      } else if (user.vote === "?") {
+        revealClass = " revealed-question";
       }
 
       voteDisplay = `<span class="player-vote revealed${revealClass}">${user.vote}</span>`;

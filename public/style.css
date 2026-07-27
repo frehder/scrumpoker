@@ -239,6 +239,9 @@ body {
 .player-vote.revealed.revealed-low {
   background: var(--green);
 }
+.player-vote.revealed.revealed-question {
+  background: #e0a52c;
+}
 .player-vote.hidden-vote {
   background: var(--green);
   color: #fff;
