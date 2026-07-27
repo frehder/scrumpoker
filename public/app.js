@@ -103,6 +103,16 @@ resetBtn.addEventListener("click", () => {
 function renderPlayers(users) {
   playerList.innerHTML = "";
 
+  const revealedNumericVotes = roomRevealed
+    ? users
+        .filter((user) => !user.spectator && user.vote !== null)
+        .map((user) => Number(user.vote))
+        .filter((vote) => Number.isFinite(vote))
+    : [];
+
+  const highestVote = revealedNumericVotes.length > 0 ? Math.max(...revealedNumericVotes) : null;
+  const lowestVote = revealedNumericVotes.length > 0 ? Math.min(...revealedNumericVotes) : null;
+
   for (const user of users) {
     const isMe = user.id === mySocketId;
     const hasVoted = user.vote !== null;
@@ -120,7 +130,18 @@ function renderPlayers(users) {
     if (user.spectator) {
       voteDisplay = `<span class="player-vote spectator-badge">👁</span>`;
     } else if (roomRevealed && hasVoted) {
-      voteDisplay = `<span class="player-vote revealed">${user.vote}</span>`;
+      const numericVote = Number(user.vote);
+      const isNumericVote = Number.isFinite(numericVote);
+      const hasSpread = highestVote !== null && lowestVote !== null && highestVote !== lowestVote;
+
+      let revealClass = "";
+      if (isNumericVote && hasSpread && numericVote === highestVote) {
+        revealClass = " revealed-high";
+      } else if (isNumericVote && hasSpread && numericVote === lowestVote) {
+        revealClass = " revealed-low";
+      }
+
+      voteDisplay = `<span class="player-vote revealed${revealClass}">${user.vote}</span>`;
     } else if (hasVoted) {
       voteDisplay = `<span class="player-vote hidden-vote"></span>`;
     } else {
@@ -161,7 +182,7 @@ function renderAverage(users, revealed) {
   }
   const avg = numeric.reduce((sum, v) => sum + Number(v), 0) / numeric.length;
   const rounded = Math.round(avg * 10) / 10;
-  voteAverage.textContent = `Average: ${rounded}`;
+  voteAverage.textContent = `Magic Average: ${rounded}`;
   voteAverage.classList.remove("hidden");
 }
 

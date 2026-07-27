@@ -233,6 +233,12 @@ body {
   background: var(--primary);
   color: #fff;
 }
+.player-vote.revealed.revealed-high {
+  background: #d33a3a;
+}
+.player-vote.revealed.revealed-low {
+  background: var(--green);
+}
 .player-vote.hidden-vote {
   background: var(--green);
   color: #fff;
