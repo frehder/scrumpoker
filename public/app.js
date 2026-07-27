@@ -37,6 +37,14 @@ socket.on("room-update", (room) => {
   renderAverage(room.users, room.revealed);
   showBtn.disabled  = room.revealed;
   showBtn.textContent = room.revealed ? "Votes Revealed" : "Show Votes";
+
+  // Keep the card deck selection in sync with the server's view of my vote.
+  // This is what clears a stuck "selected" card for everyone once the room's votes are actually reset.
+  const me = room.users.find((u) => u.id === mySocketId);
+  if (me && me.vote === null && myVote !== null) {
+    myVote = null;
+    updateSelectedCard(null);
+  }
 });
 
 // ── Name form ─────────────────────────────────────────────────────────────
