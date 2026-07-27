@@ -80,7 +80,12 @@ VOTE_OPTIONS.forEach((val) => {
   card.addEventListener("click", () => {
     if (roomRevealed) return;
     // Toggle off if already selected
-    if (myVote === val) return;
+    if (myVote === val) {
+      myVote = null;
+      socket.emit("vote", { roomId, vote: null });
+      updateSelectedCard(null);
+      return;
+    }
     myVote = val;
     socket.emit("vote", { roomId, vote: val });
     updateSelectedCard(val);

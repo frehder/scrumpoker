@@ -180,10 +180,10 @@ io.on("connection", (socket) => {
     if (room.revealed) return; // no voting after reveal
 
     const VALID_VOTES = [0, 0.5, 1, 2, 3, 5, 8, 13, "?", 9999];
-    if (!VALID_VOTES.includes(vote)) return;
+    if (vote !== null && !VALID_VOTES.includes(vote)) return;
 
     user.vote = vote;
-    incrementStat("votesSubmitted");
+    if (vote !== null) incrementStat("votesSubmitted");
     io.to(roomId).emit("room-update", getRoomPayload(room));
   });
 
