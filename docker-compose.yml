@@ -10,3 +10,8 @@ services:
       - STATS_TOKEN=${STATS_TOKEN:-}
     volumes:
       - ${VOLUME_BASE_PATH:-/opt/docker/volumes}/${APP_NAME:-scrumpoker}:/app/data
+    networks:
+      - caddynet
+networks:
+  caddynet:
+    external: true
