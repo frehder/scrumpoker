@@ -115,6 +115,9 @@ resetBtn.addEventListener("click", () => {
 // ── Render ────────────────────────────────────────────────────────────────
 function renderPlayers(users) {
   playerList.innerHTML = "";
+  const sortedUsers = [...users].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+  );
 
   const revealedNumericVotes = roomRevealed
     ? users
@@ -126,7 +129,7 @@ function renderPlayers(users) {
   const highestVote = revealedNumericVotes.length > 0 ? Math.max(...revealedNumericVotes) : null;
   const lowestVote = revealedNumericVotes.length > 0 ? Math.min(...revealedNumericVotes) : null;
 
-  for (const user of users) {
+  for (const user of sortedUsers) {
     const isMe = user.id === mySocketId;
     const hasVoted = user.vote !== null;
 
