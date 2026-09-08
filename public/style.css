@@ -25,7 +25,27 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  padding-bottom: 2.75rem;
 }
+
+/* ── Footer ── */
+.site-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0.6rem 1.5rem;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.site-footer a {
+  color: var(--primary);
+  text-decoration: none;
+}
+.site-footer a:hover { text-decoration: underline; }
 
 /* ── Landing ── */
 .landing {

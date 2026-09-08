@@ -92,6 +92,22 @@
       .today-row td { color: #4f46e5; font-weight: 600; }
 
       #updated { font-size: .7rem; color: #94a3b8; margin-top: 2rem; }
+
+      .site-footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: .6rem 1.5rem;
+        background: #fff;
+        border-top: 1px solid #e2e8f0;
+        text-align: center;
+        font-size: .8rem;
+        color: #94a3b8;
+      }
+      .site-footer a { color: #4f46e5; text-decoration: none; }
+      .site-footer a:hover { text-decoration: underline; }
+      body { padding-bottom: 3rem; }
     </style>
   </head>
   <body>
@@ -134,6 +150,10 @@
     </div>
 
     <div id="updated"></div>
+
+    <footer class="site-footer">
+      View on <a href="https://github.com/frehder/scrumpoker" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </footer>
 
     <script>
       const METRICS = [
