@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { randomUUID } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -96,6 +96,19 @@ function incrementStat(metric) {
   saveStatsSoon();
 }
 
+// Unambiguous alphabet (no 0/O, 1/I/l) sized 32 for unbiased byte-to-char mapping.
+const ROOM_ID_ALPHABET = "23456789abcdefghjkmnpqrstuvwxyz";
+const ROOM_ID_LENGTH = 6;
+
+function generateRoomId() {
+  let id;
+  do {
+    const bytes = randomBytes(ROOM_ID_LENGTH);
+    id = Array.from(bytes, (b) => ROOM_ID_ALPHABET[b % ROOM_ID_ALPHABET.length]).join("");
+  } while (rooms.has(id));
+  return id;
+}
+
 function getOrCreateRoom(roomId) {
   if (!rooms.has(roomId)) {
     rooms.set(roomId, { users: new Map(), revealed: false });
@@ -131,7 +144,7 @@ app.get("/room/:id", (_req, res) => {
 // Create a new room and redirect
 app.get("/create", (_req, res) => {
   incrementStat("roomsCreated");
-  const id = randomUUID();
+  const id = generateRoomId();
   res.redirect(`/room/${id}`);
 });
 
