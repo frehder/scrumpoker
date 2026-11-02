@@ -130,9 +130,14 @@ body {
 #name-form > .btn {
   align-self: flex-start;
 }
+.name-row {
+  position: relative;
+  display: flex;
+}
 #name-input {
   flex: 1;
-  padding: 0.6rem 1rem;
+  min-width: 0;
+  padding: 0.6rem 2.5rem 0.6rem 1rem;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -141,6 +146,22 @@ body {
   outline: none;
 }
 #name-input:focus { border-color: var(--primary); }
+
+.name-clear {
+  position: absolute;
+  top: 50%; right: 0.5rem;
+  transform: translateY(-50%);
+  width: 1.6rem; height: 1.6rem;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.name-clear:hover { background: var(--border); color: var(--text); }
 
 .spectator-label {
   display: flex;

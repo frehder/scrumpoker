@@ -13,14 +13,17 @@
         <h2>Join Room</h2>
         <p>Enter your name to join the poker session.</p>
         <form id="name-form">
-          <input
-            id="name-input"
-            type="text"
-            placeholder="Your name"
-            maxlength="32"
-            autocomplete="off"
-            required
-          />
+          <div class="name-row">
+            <input
+              id="name-input"
+              type="text"
+              placeholder="Your name"
+              maxlength="32"
+              autocomplete="off"
+              required
+            />
+            <button id="forget-name-btn" type="button" class="name-clear hidden" title="Clear name" aria-label="Clear name">×</button>
+          </div>
           <label class="spectator-label">
             <input id="spectator-input" type="checkbox" />
             Join as spectator

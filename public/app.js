@@ -7,6 +7,7 @@ if (!roomId) location.href = "/";
 const nameModal       = document.getElementById("name-modal");
 const nameForm        = document.getElementById("name-form");
 const nameInput       = document.getElementById("name-input");
+const forgetNameBtn   = document.getElementById("forget-name-btn");
 const spectatorInput  = document.getElementById("spectator-input");
 const app             = document.getElementById("app");
 const roomIdDisplay   = document.getElementById("room-id-display");
@@ -48,10 +49,43 @@ socket.on("room-update", (room) => {
 });
 
 // ── Name form ─────────────────────────────────────────────────────────────
+const NAME_STORAGE_KEY = "scrumpoker:name";
+
+function loadSavedName() {
+  try { return localStorage.getItem(NAME_STORAGE_KEY) ?? ""; } catch { return ""; }
+}
+
+function saveName(name) {
+  try { localStorage.setItem(NAME_STORAGE_KEY, name); } catch {}
+}
+
+function forgetName() {
+  try { localStorage.removeItem(NAME_STORAGE_KEY); } catch {}
+}
+
+function updateClearButton() {
+  forgetNameBtn.classList.toggle("hidden", nameInput.value === "");
+}
+
+nameInput.value = loadSavedName();
+updateClearButton();
+nameInput.focus();
+
+nameInput.addEventListener("input", updateClearButton);
+
+forgetNameBtn.addEventListener("click", () => {
+  forgetName();
+  nameInput.value = "";
+  updateClearButton();
+  nameInput.focus();
+});
+
 nameForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const name = nameInput.value.trim();
   if (!name) return;
+
+  saveName(name);
 
   mySpectator = spectatorInput.checked;
   socket.emit("join-room", { roomId, name, spectator: mySpectator });
